@@ -1,34 +1,81 @@
-// eslint-disable-next-line no-unused-vars
-import { Express } from 'express';
+import express from 'express';
 import AppController from '../controllers/AppController';
-import AuthController from '../controllers/AuthController';
 import UsersController from '../controllers/UsersController';
+import AuthController from '../controllers/AuthController';
 import FilesController from '../controllers/FilesController';
-import { basicAuthenticate, xTokenAuthenticate } from '../middlewares/auth';
-import { APIError, errorResponse } from '../middlewares/error';
 
-// Injects routes with their handlers to the given Express application.
-const injectRoutes = (api) => {
-  api.get('/status', AppController.getStatus);
-  api.get('/stats', AppController.getStats);
+function controllerRouting(app) {
+  const router = express.Router();
+  app.use('/', router);
 
-  api.get('/connect', basicAuthenticate, AuthController.getConnect);
-  api.get('/disconnect', xTokenAuthenticate, AuthController.getDisconnect);
+  // App Controller
 
-  api.post('/users', UsersController.postNew);
-  api.get('/users/me', xTokenAuthenticate, UsersController.getMe);
-
-  api.post('/files', xTokenAuthenticate, FilesController.postUpload);
-  api.get('/files/:id', xTokenAuthenticate, FilesController.getShow);
-  api.get('/files', xTokenAuthenticate, FilesController.getIndex);
-  api.put('/files/:id/publish', xTokenAuthenticate, FilesController.putPublish);
-  api.put('/files/:id/unpublish', xTokenAuthenticate, FilesController.putUnpublish);
-  api.get('/files/:id/data', FilesController.getFile);
-
-  api.all('*', (req, res, next) => {
-    errorResponse(new APIError(404, `Cannot ${req.method} ${req.url}`), req, res, next);
+  // Returns if Redis is alive and if the DB is alive
+  router.get('/status', (req, res) => {
+    AppController.getStatus(req, res);
   });
-  api.use(errorResponse);
-};
 
-export default injectRoutes;
+  // Returns the number of users and files in DB
+  router.get('/stats', (req, res) => {
+    AppController.getStats(req, res);
+  });
+
+  // User Controller
+
+  // creates a new user in DB
+  router.post('/users', (req, res) => {
+    UsersController.postNew(req, res);
+  });
+
+  // retrieves the user base on the token used
+  router.get('/users/me', (req, res) => {
+    UsersController.getMe(req, res);
+  });
+
+  // Auth Controller
+
+  // sign-in the user by generating a new authentication token
+  router.get('/connect', (req, res) => {
+    AuthController.getConnect(req, res);
+  });
+
+  // sign-out the user based on the token
+  router.get('/disconnect', (req, res) => {
+    AuthController.getDisconnect(req, res);
+  });
+
+  // Files Controller
+
+  // creates a new file in DB and in disk
+  router.post('/files', (req, res) => {
+    FilesController.postUpload(req, res);
+  });
+
+  // should retrieve the file document based on the ID
+  router.get('/files/:id', (req, res) => {
+    FilesController.getShow(req, res);
+  });
+
+  // retrieves all users file documents for a
+  // specific parentId and with pagination
+  router.get('/files', (req, res) => {
+    FilesController.getIndex(req, res);
+  });
+
+  // set isPublic to true on the file document based on the ID
+  router.put('/files/:id/publish', (req, res) => {
+    FilesController.putPublish(req, res);
+  });
+
+  // set isPublic to false on the file document based on the ID
+  router.put('/files/:id/unpublish', (req, res) => {
+    FilesController.putUnpublish(req, res);
+  });
+
+  // Returns the content of the file document based on the ID
+  router.get('/files/:id/data', (req, res) => {
+    FilesController.getFile(req, res);
+  });
+}
+
+export default controllerRouting;
