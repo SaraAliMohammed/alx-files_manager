@@ -9,7 +9,7 @@ should();
 
 // redisClient
 
-describe('Testing the clients for MongoDB and Redis', () => {
+describe('testing the clients for MongoDB and Redis', () => {
   describe('redis Client', () => {
     before(async () => {
       await redisClient.client.flushall('ASYNC');

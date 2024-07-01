@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-//Basic utilities Module
+// Basic utilities Module
 const basicUtils = {
   // Checks if Id is Valid for Mongo
   isValidId(id) {

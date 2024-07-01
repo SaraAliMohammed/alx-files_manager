@@ -43,7 +43,6 @@ fileQueue.process(async (job) => {
     try {
       const thumbnail = await imageThumbnail(localPath, options);
       await fsPromises.writeFile(`${localPath}_${width}`, thumbnail);
-
     } catch (err) {
       console.error(err.message);
     }

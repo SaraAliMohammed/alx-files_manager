@@ -9,7 +9,9 @@ import basicUtils from './basic';
 const fileUtils = {
   // Validates if body is valid for creating file
   async validateBody(request) {
-    const { name, type, isPublic = false, data } = request.body;
+    const {
+      name, type, isPublic = false, data,
+    } = request.body;
 
     let { parentId = 0 } = request.body;
 
@@ -70,7 +72,9 @@ const fileUtils = {
 
   // saves files to database and disk
   async saveFile(userId, fileParams, FOLDER_PATH) {
-    const { name, type, isPublic, data } = fileParams;
+    const {
+      name, type, isPublic, data,
+    } = fileParams;
     let { parentId } = fileParams;
 
     if (parentId !== 0) parentId = ObjectId(parentId);
@@ -118,7 +122,7 @@ const fileUtils = {
     const fileList = await dbClient.filesCollection.findOneAndUpdate(
       query,
       set,
-      { returnOriginal: false }
+      { returnOriginal: false },
     );
     return fileList;
   },
@@ -127,13 +131,11 @@ const fileUtils = {
   async publishUnpublish(request, setPublish) {
     const { id: fileId } = request.params;
 
-    if (!basicUtils.isValidId(fileId))
-      return { error: 'Unauthorized', code: 401 };
+    if (!basicUtils.isValidId(fileId)) return { error: 'Unauthorized', code: 401 };
 
     const { userId } = await userUtils.getUserIdAndKey(request);
 
-    if (!basicUtils.isValidId(userId))
-      return { error: 'Unauthorized', code: 401 };
+    if (!basicUtils.isValidId(userId)) return { error: 'Unauthorized', code: 401 };
 
     const user = await userUtils.getUser({
       _id: ObjectId(userId),
@@ -153,7 +155,7 @@ const fileUtils = {
         _id: ObjectId(fileId),
         userId: ObjectId(userId),
       },
-      { $set: { isPublic: setPublish } }
+      { $set: { isPublic: setPublish } },
     );
 
     const {
@@ -192,10 +194,9 @@ const fileUtils = {
   // Checks if a file is public and belongs to a specific user
   isOwnerAndPublic(file, userId) {
     if (
-      (!file.isPublic && !userId) ||
-      (userId && file.userId.toString() !== userId && !file.isPublic)
-    )
-      return false;
+      (!file.isPublic && !userId)
+      || (userId && file.userId.toString() !== userId && !file.isPublic)
+    ) return false;
 
     return true;
   },
